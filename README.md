@@ -12,7 +12,8 @@ Application web complète permettant aux utilisateurs de consulter des événeme
 
 ## 👥 Équipe de Développement
 - [Fourat Jebali] - [fouratcs@gmail.com/fouratjebali]
-- [Mohamed Amin Neji] - [mohamedneji2025@gmail.com/GitHub]
+- [Mohamed Amin Neji] - [mohamedneji2025@gmail.com/AminNeji]
+- [Salim Halila] - [salimhalila@gmail.com/salimhalila] 
 
 ## 🚀 Installation et Configuration
 
