@@ -26,7 +26,7 @@ Application web complète permettant aux utilisateurs de consulter des événeme
 1. **Cloner le projet**
 ```bash
 git clone [URL_DU_REPO]
-cd MiniProjet2A-EventReservation-NomEquipe
+cd MiniProjet2A-EventReservation-FouratetAminetSalim
 ```
 
 2. **Lancer Docker**
