@@ -1,52 +1,61 @@
 version: '3.8'
 
 services:
-  # Service PHP/Apache
-  web:
-    build: .
+  minievent_db:
+    image: mysql:8.0
+    container_name: minievent_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: minievent_db
+      MYSQL_USER: minievent_user
+      MYSQL_PASSWORD: minievent_pass
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - minievent_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot_password"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  minievent_web:
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: minievent_web
     ports:
       - "7000:80"
     volumes:
       - ./:/var/www/html
     depends_on:
-      - mysql
+      minievent_db:
+        condition: service_healthy
     networks:
       - minievent_network
+    restart: on-failure
 
-  # Service MySQL
-  mysql:
-    image: mysql:8.0
-    container_name: minievent_mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: minievent_db
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-      - minievent_network
-
-  # Service phpMyAdmin (optionnel mais utile)
-  phpmyadmin:
+  minievent_phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: minievent_phpmyadmin
     environment:
-      PMA_HOST: mysql
+      PMA_HOST: minievent_db
       PMA_PORT: 3306
-      MYSQL_ROOT_PASSWORD: rootpassword
+      PMA_USER: root
+      PMA_PASSWORD: root_password
     ports:
       - "9000:80"
     depends_on:
-      - mysql
+      - minievent_db
     networks:
       - minievent_network
-
-volumes:
-  mysql_data:
 
 networks:
   minievent_network:
     driver: bridge
+
+volumes:
+  db_data:

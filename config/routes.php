@@ -1,50 +1,68 @@
 <?php
-function route($uri) {
+
+function route($uri)
+{
     $uri = trim($uri, '/');
-    
-    switch ($uri) {
-        case '':
-        case 'events':
-            require_once '../app/controllers/EventController.php';
-            $controller = new EventController();
-            $controller->index();
-            break;
-        
-        case (preg_match('/^events\/(\d+)$/', $uri, $matches) ? true : false):
-            require_once '../app/controllers/EventController.php';
-            $controller = new EventController();
-            $controller->show($matches[1]);
-            break;
-        
-        case 'reservation':
-            require_once '../app/controllers/EventController.php';
-            $controller = new EventController();
-            $controller->reserve();
-            break;
-        
-        case 'admin':
-        case 'admin/login':
-            require_once '../app/controllers/AdminController.php';
-            $controller = new AdminController();
-            $controller->login();
-            break;
-        
-        case 'admin/dashboard':
-            require_once '../app/controllers/AdminController.php';
-            $controller = new AdminController();
-            $controller->dashboard();
-            break;
-        
-        case 'admin/logout':
-            require_once '../app/controllers/AdminController.php';
-            $controller = new AdminController();
-            $controller->logout();
-            break;
-        
-        default:
-            http_response_code(404);
-            echo "Page non trouvée";
-            break;
+
+    $baseControllerPath = __DIR__ . '/../app/controllers/';
+
+    if ($uri === '' || $uri === 'events') {
+        require_once $baseControllerPath . 'EventController.php';
+        $controller = new EventController();
+        $controller->list();
+        return;
     }
+
+    if (preg_match('#^events/(\d+)$#', $uri, $matches)) {
+        require_once $baseControllerPath . 'EventController.php';
+        $controller = new EventController();
+        $controller->show((int)$matches[1]);
+        return;
+    }
+
+    if ($uri === 'reservation') {
+        require_once $baseControllerPath . 'EventController.php';
+        $controller = new EventController();
+        $controller->reserve();
+        return;
+    }
+
+    if ($uri === 'admin' || $uri === 'admin/login') {
+        require_once $baseControllerPath . 'AdminController.php';
+        $controller = new AdminController();
+        $controller->showLogin();
+        return;
+    }
+
+    if ($uri === 'admin/dashboard') {
+        require_once $baseControllerPath . 'AdminController.php';
+        $controller = new AdminController();
+        $controller->dashboard();
+        return;
+    }
+
+    if ($uri === 'admin/logout') {
+        require_once $baseControllerPath . 'AdminController.php';
+        $controller = new AdminController();
+        $controller->logout();
+        return;
+    }
+
+    if ($uri === 'admin/register') {
+    require_once __DIR__ . '/../app/controllers/AdminController.php';
+    $controller = new AdminController();
+    $controller->showRegister();
+    return;
+}
+    if ($uri === 'event/list') {
+        require_once $baseControllerPath . 'EventController.php';
+        $controller = new EventController();
+        $controller->list();
+        return;
+    }
+
+
+    http_response_code(404);
+    echo 'Page non trouvée';
 }
 ?>

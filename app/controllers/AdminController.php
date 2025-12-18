@@ -1,8 +1,9 @@
 <?php
-require_once 'config/database.php';
-require_once 'app/models/Admin.php';
-require_once 'app/models/Event.php';
-require_once 'app/models/Reservation.php';
+require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../models/Admin.php';
+require_once __DIR__ . '/../models/Event.php';
+require_once __DIR__ . '/../models/Reservation.php';
+
 
 class AdminController {
     private $db;
@@ -24,7 +25,8 @@ class AdminController {
             header('Location: /admin/dashboard');
             exit;
         }
-        require_once 'app/views/admin/login.php';
+        require_once __DIR__ . '/../views/admin/login.php';
+
     }
     
     public function login() {
@@ -56,7 +58,7 @@ class AdminController {
             header('Location: /admin/dashboard');
             exit;
         }
-        require_once 'app/views/admin/register.php';
+        require_once __DIR__ . '/../views/admin/register.php';
     }
     
     public function register() {
@@ -92,7 +94,8 @@ class AdminController {
             $events = $this->event->getAll();
         }
         
-        require_once 'app/views/admin/dashboard.php';
+        require_once __DIR__ . '/../views/admin/dashboard.php';
+
     }
     
     public function manageEvents() {
@@ -104,7 +107,8 @@ class AdminController {
             $events = $this->event->getAll();
         }
         
-        require_once 'app/views/admin/events.php';
+        require_once __DIR__ . '/../views/admin/events.php';
+
     }
     
     public function showEventForm($id = null) {
@@ -121,7 +125,8 @@ class AdminController {
             }
         }
         
-        require_once 'app/views/admin/form_event.php';
+        require_once __DIR__ . '/../views/admin/form_event.php';
+
     }
     
     public function createEvent() {
@@ -201,13 +206,15 @@ class AdminController {
     public function manageUsers() {
         $this->checkAuth(['admin']);
         $users = $this->admin->getAllUsers();
-        require_once 'app/views/admin/users.php';
+        require_once __DIR__ . '/../views/admin/users.php';
+
     }
     
     public function manageRegistrations() {
         $this->checkAuth(['admin', 'organizer']);
         $registrations = $this->reservation->getAll();
-        require_once 'app/views/admin/registrations.php';
+        require_once __DIR__ . '/../views/admin/registrations.php';
+
     }
     
     private function checkAuth($allowed_roles = []) {
