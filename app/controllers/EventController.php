@@ -1,51 +1,60 @@
 <?php
 session_start();
-require_once '../config/database.php';
-require_once '../app/models/Event.php';
-require_once '../app/models/Reservation.php';
 
-class EventController {
+require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../models/Event.php';
+require_once __DIR__ . '/../models/Reservation.php';
+
+class EventController
+{
     private $db;
     private $event;
     private $reservation;
 
-    public function __construct() {
+    public function __construct()
+    {
         $database = new Database();
         $this->db = $database->getConnection();
         $this->event = new Event($this->db);
         $this->reservation = new Reservation($this->db);
     }
 
-    public function index() {
+    public function index()
+    {
         $stmt = $this->event->getAll();
         $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        require_once '../app/views/events/list.php';
+
+        require_once __DIR__ . '/../views/events/list.php';
     }
 
-    public function list() {
+    public function list()
+    {
         $search = $_GET['search'] ?? '';
         $filter = $_GET['filter'] ?? 'all';
+
         $stmt = $this->event->search($search, $filter);
         $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        require_once '../app/views/events/list.php';
+
+        require_once __DIR__ . '/../views/events/list.php';
     }
 
-    public function details() {
+    public function details()
+    {
         if (!isset($_GET['id'])) {
-            header("Location: /");
-            exit();
+            header('Location: /');
+            exit;
         }
 
         $id = $_GET['id'];
         $stmt = $this->event->getById($id);
-        
+
         if ($stmt->rowCount() === 0) {
-            header("Location: /");
-            exit();
+            header('Location: /');
+            exit;
         }
 
         $event = $stmt->fetch(PDO::FETCH_ASSOC);
-        
+
         $isRegistered = false;
         if (isset($_SESSION['user_id'])) {
             $isRegistered = $this->reservation->isRegistered($_SESSION['user_id'], $id);
@@ -71,13 +80,14 @@ class EventController {
             }
         }
 
-        require_once '../app/views/events/details.php';
+        require_once __DIR__ . '/../views/events/details.php';
     }
 
-    public function create() {
+    public function create()
+    {
         if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'organizer') {
-            header("Location: /");
-            exit();
+            header('Location: /');
+            exit;
         }
 
         $error = '';
@@ -99,32 +109,35 @@ class EventController {
             }
         }
 
-        require_once '../app/views/admin/form_event.php';
+        require_once __DIR__ . '/../views/admin/form_event.php';
     }
 
-    public function myEvents() {
+    public function myEvents()
+    {
         if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'organizer') {
-            header("Location: /");
-            exit();
+            header('Location: /');
+            exit;
         }
 
         $stmt = $this->event->getByOrganizer($_SESSION['user_id']);
         $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        require_once '../app/views/admin/dashboard.php';
+
+        require_once __DIR__ . '/../views/admin/dashboard.php';
     }
 
-    public function edit() {
+    public function edit()
+    {
         if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'organizer' || !isset($_GET['id'])) {
-            header("Location: /");
-            exit();
+            header('Location: /');
+            exit;
         }
 
         $id = $_GET['id'];
         $stmt = $this->event->getById($id);
-        
+
         if ($stmt->rowCount() === 0) {
-            header("Location: /event/myEvents");
-            exit();
+            header('Location: /event/myEvents');
+            exit;
         }
 
         $event = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -151,50 +164,53 @@ class EventController {
             }
         }
 
-        require_once '../app/views/admin/form_event.php';
+        require_once __DIR__ . '/../views/admin/form_event.php';
     }
 
-    public function registrations() {
+    public function registrations()
+    {
         if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'organizer' || !isset($_GET['id'])) {
-            header("Location: /");
-            exit();
+            header('Location: /');
+            exit;
         }
 
         $eventId = $_GET['id'];
         $eventStmt = $this->event->getById($eventId);
-        
+
         if ($eventStmt->rowCount() === 0) {
-            header("Location: /event/myEvents");
-            exit();
+            header('Location: /event/myEvents');
+            exit;
         }
 
         $event = $eventStmt->fetch(PDO::FETCH_ASSOC);
         $regStmt = $this->reservation->getByEvent($eventId);
         $registrations = $regStmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        require_once '../app/views/admin/registrations.php';
+
+        require_once __DIR__ . '/../views/admin/registrations.php';
     }
 
-    public function myRegistrations() {
+    public function myRegistrations()
+    {
         if (!isset($_SESSION['user_id'])) {
-            header("Location: /admin/login");
-            exit();
+            header('Location: /admin/login');
+            exit;
         }
 
         $stmt = $this->reservation->getByUser($_SESSION['user_id']);
         $registrations = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        require_once '../app/views/participant/dashboard.php';
+
+        require_once __DIR__ . '/../views/participant/dashboard.php';
     }
 
-    public function cancelRegistration() {
+    public function cancelRegistration()
+    {
         if (!isset($_SESSION['user_id']) || !isset($_GET['id'])) {
-            header("Location: /");
-            exit();
+            header('Location: /');
+            exit;
         }
 
         $this->reservation->cancel($_SESSION['user_id'], $_GET['id']);
-        header("Location: /event/myRegistrations");
-        exit();
+        header('Location: /event/myRegistrations');
+        exit;
     }
 }
-?>
