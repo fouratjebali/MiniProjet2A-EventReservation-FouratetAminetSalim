@@ -48,21 +48,43 @@ docker-compose up -d
 ## 📁 Structure du Projet
 ```
 MiniEvent/
-├── app/
-│   ├── models/          # Classes métier (Event, Reservation, Admin)
-│   ├── controllers/     # Logique applicative
-│   └── views/           # Fichiers de vues HTML/PHP
-├── public/
-│   ├── css/            # Feuilles de style
-│   ├── js/             # Scripts JavaScript
-│   ├── uploads/        # Images téléchargées
-│   └── index.php       # Point d'entrée (routeur)
-├── config/
-│   ├── database.php    # Connexion PDO à MySQL
-│   └── routes.php      # Gestion des routes
-├── Dockerfile
 ├── docker-compose.yml
-└── init.sql            # Script d'initialisation de la BD
+├── Dockerfile
+├── init.sql
+├── config/
+│   ├── database.php
+│   └── routes.php
+├── app/
+│   ├── models/
+│   │   ├── Event.php
+│   │   ├── Reservation.php
+│   │   └── Admin.php
+│   ├── controllers/
+│   │   ├── EventController.php
+│   │   └── AdminController.php
+│   └── views/
+│       ├── events/
+│       │   ├── list.php
+│       │   └── details.php
+│       ├── admin/
+│       │   ├── dashboard.php
+│       │   ├── login.php
+│       │   ├── register.php
+│       │   ├── form_event.php
+│       │   ├── users.php
+│       │   ├── events.php
+│       │   └── registrations.php
+│       ├── participant/
+│       │   └── dashboard.php
+│       └── partials/
+│           ├── header.php
+|           ├── head.php
+│           └── footer.php
+└── public/
+    ├── index.php
+    ├── .htaccess
+    └── css/
+        └── style.css
 ```
 
 ## ✨ Fonctionnalités
