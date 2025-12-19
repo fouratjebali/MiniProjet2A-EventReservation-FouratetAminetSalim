@@ -85,38 +85,49 @@ class AdminController {
     
     public function dashboard() {
         $this->checkAuth(['admin', 'organizer']);
-        
+
         $stats = $this->admin->getStats();
-        
+
         if ($_SESSION['role'] === 'organizer') {
-            $events = $this->event->getByOrganizer($_SESSION['user_id']);
+            $stmt = $this->event->getByOrganizer($_SESSION['user_id']);
         } else {
-            $events = $this->event->getAll();
+            $stmt = $this->event->getAll();
         }
-        
+
+        $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
         require_once __DIR__ . '/../views/admin/dashboard.php';
 
     }
     
     public function manageEvents() {
         $this->checkAuth(['admin', 'organizer']);
-        
+
         if ($_SESSION['role'] === 'organizer') {
-            $events = $this->event->getByOrganizer($_SESSION['user_id']);
+            $stmt = $this->event->getByOrganizer($_SESSION['user_id']);
         } else {
-            $events = $this->event->getAll();
+            $stmt = $this->event->getAllForAdmin();
         }
-        
+
+        $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
         require_once __DIR__ . '/../views/admin/events.php';
 
     }
     
     public function showEventForm($id = null) {
         $this->checkAuth(['admin', 'organizer']);
-        
+
         $event = null;
         if ($id) {
-            $event = $this->event->getById($id);
+            $stmt = $this->event->getById($id);
+            if ($stmt->rowCount() === 0) {
+                $_SESSION['error'] = 'Event not found';
+                header('Location: /admin/events');
+                exit;
+            }
+            $event = $stmt->fetch(PDO::FETCH_ASSOC);
+
             // Check if organizer owns this event
             if ($_SESSION['role'] === 'organizer' && $event['organizer_id'] != $_SESSION['user_id']) {
                 $_SESSION['error'] = 'Access denied';
@@ -124,95 +135,114 @@ class AdminController {
                 exit;
             }
         }
-        
+
         require_once __DIR__ . '/../views/admin/form_event.php';
 
     }
     
     public function createEvent() {
         $this->checkAuth(['admin', 'organizer']);
-        
-        $data = [
-            'title' => $_POST['title'] ?? '',
-            'description' => $_POST['description'] ?? '',
-            'date' => $_POST['date'] ?? '',
-            'time' => $_POST['time'] ?? '',
-            'location' => $_POST['location'] ?? '',
-            'capacity' => $_POST['capacity'] ?? 0,
-            'organizer_id' => $_SESSION['user_id'],
-            'status' => $_POST['status'] ?? 'upcoming'
-        ];
-        
-        if ($this->event->create($data)) {
-            $_SESSION['success'] = 'Event created successfully';
-        } else {
-            $_SESSION['error'] = 'Failed to create event';
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->event->title = $_POST['title'] ?? '';
+            $this->event->description = $_POST['description'] ?? '';
+            $this->event->date = $_POST['date'] ?? '';
+            $this->event->time = $_POST['time'] ?? '';
+            $this->event->location = $_POST['location'] ?? '';
+            $this->event->capacity = $_POST['capacity'] ?? 0;
+            $this->event->status = $_POST['status'] ?? 'upcoming';
+            $this->event->organizer_id = $_SESSION['user_id'];
+
+            if ($this->event->create()) {
+                $_SESSION['success'] = 'Event created successfully';
+            } else {
+                $_SESSION['error'] = 'Failed to create event';
+            }
+
+            header('Location: /admin/events');
+            exit;
         }
-        
-        header('Location: /admin/events');
-        exit;
+
+        // show the form if not POST
+        require_once __DIR__ . '/../views/admin/form_event.php';
     }
     
     public function updateEvent($id) {
         $this->checkAuth(['admin', 'organizer']);
-        
-        $event = $this->event->getById($id);
-        if ($_SESSION['role'] === 'organizer' && $event['organizer_id'] != $_SESSION['user_id']) {
+
+        $stmt = $this->event->getById($id);
+        if ($stmt->rowCount() === 0) {
+            $_SESSION['error'] = 'Event not found';
+            header('Location: /admin/events');
+            exit;
+        }
+
+        $eventRow = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($_SESSION['role'] === 'organizer' && $eventRow['organizer_id'] != $_SESSION['user_id']) {
             $_SESSION['error'] = 'Access denied';
             header('Location: /admin/events');
             exit;
         }
-        
-        $data = [
-            'title' => $_POST['title'] ?? '',
-            'description' => $_POST['description'] ?? '',
-            'date' => $_POST['date'] ?? '',
-            'time' => $_POST['time'] ?? '',
-            'location' => $_POST['location'] ?? '',
-            'capacity' => $_POST['capacity'] ?? 0,
-            'status' => $_POST['status'] ?? 'upcoming'
-        ];
-        
-        if ($this->event->update($id, $data)) {
+
+        $this->event->id = $id;
+        $this->event->title = $_POST['title'] ?? '';
+        $this->event->description = $_POST['description'] ?? '';
+        $this->event->date = $_POST['date'] ?? '';
+        $this->event->time = $_POST['time'] ?? '';
+        $this->event->location = $_POST['location'] ?? '';
+        $this->event->capacity = $_POST['capacity'] ?? 0;
+        $this->event->status = $_POST['status'] ?? 'upcoming';
+        $this->event->organizer_id = $eventRow['organizer_id'];
+
+        if ($this->event->update()) {
             $_SESSION['success'] = 'Event updated successfully';
         } else {
             $_SESSION['error'] = 'Failed to update event';
         }
-        
+
         header('Location: /admin/events');
         exit;
     }
     
     public function deleteEvent($id) {
         $this->checkAuth(['admin', 'organizer']);
-        
-        $event = $this->event->getById($id);
-        if ($_SESSION['role'] === 'organizer' && $event['organizer_id'] != $_SESSION['user_id']) {
+
+        $stmt = $this->event->getById($id);
+        if ($stmt->rowCount() === 0) {
+            $_SESSION['error'] = 'Event not found';
+            header('Location: /admin/events');
+            exit;
+        }
+
+        $eventRow = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($_SESSION['role'] === 'organizer' && $eventRow['organizer_id'] != $_SESSION['user_id']) {
             $_SESSION['error'] = 'Access denied';
             header('Location: /admin/events');
             exit;
         }
-        
+
         if ($this->event->delete($id)) {
             $_SESSION['success'] = 'Event deleted successfully';
         } else {
             $_SESSION['error'] = 'Failed to delete event';
         }
-        
+
         header('Location: /admin/events');
         exit;
     }
     
     public function manageUsers() {
         $this->checkAuth(['admin']);
-        $users = $this->admin->getAllUsers();
+        $stmt = $this->admin->getAllUsers();
+        $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
         require_once __DIR__ . '/../views/admin/users.php';
 
     }
     
     public function manageRegistrations() {
         $this->checkAuth(['admin', 'organizer']);
-        $registrations = $this->reservation->getAll();
+        $stmt = $this->reservation->getAll();
+        $registrations = $stmt->fetchAll(PDO::FETCH_ASSOC);
         require_once __DIR__ . '/../views/admin/registrations.php';
 
     }

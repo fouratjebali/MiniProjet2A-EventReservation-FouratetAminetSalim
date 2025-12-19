@@ -37,7 +37,7 @@
                             <p><strong>Organizer:</strong> <?php echo htmlspecialchars($event['organizer_name']); ?></p>
                             <p><strong>Available:</strong> <?php echo $event['capacity'] - $event['registered_count']; ?> / <?php echo $event['capacity']; ?></p>
                         </div>
-                        <a href="/event/details?id=<?php echo $event['id']; ?>" class="btn">View Details</a>
+                        <a href="/events/<?php echo $event['id']; ?>" class="btn">View Details</a>
                     </div>
                 <?php endforeach; ?>
             <?php else: ?>

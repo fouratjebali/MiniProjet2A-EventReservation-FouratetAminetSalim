@@ -38,6 +38,51 @@ class EventController
         require_once __DIR__ . '/../views/events/list.php';
     }
 
+    // Compatibility handler for routes calling /events/{id}
+    public function show($id)
+    {
+        if (empty($id)) {
+            header('Location: /');
+            exit;
+        }
+
+        $stmt = $this->event->getById($id);
+
+        if ($stmt->rowCount() === 0) {
+            header('Location: /');
+            exit;
+        }
+
+        $event = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $isRegistered = false;
+        if (isset($_SESSION['user_id'])) {
+            $isRegistered = $this->reservation->isRegistered($_SESSION['user_id'], $id);
+        }
+
+        $message = '';
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id'])) {
+            if ($event['status'] === 'upcoming' && !$isRegistered) {
+                $availableSlots = $event['capacity'] - $event['registered_count'];
+                if ($availableSlots > 0) {
+                    $this->reservation->user_id = $_SESSION['user_id'];
+                    $this->reservation->event_id = $id;
+                    if ($this->reservation->create()) {
+                        $message = 'Registration successful!';
+                        $isRegistered = true;
+                        $event['registered_count']++;
+                    } else {
+                        $message = 'Registration failed. Please try again.';
+                    }
+                } else {
+                    $message = 'Sorry, this event is full.';
+                }
+            }
+        }
+
+        require_once __DIR__ . '/../views/events/details.php';
+    }
+
     public function details()
     {
         if (!isset($_GET['id'])) {

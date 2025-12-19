@@ -30,7 +30,11 @@ function route($uri)
     if ($uri === 'admin' || $uri === 'admin/login') {
         require_once $baseControllerPath . 'AdminController.php';
         $controller = new AdminController();
-        $controller->showLogin();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $controller->login();
+        } else {
+            $controller->showLogin();
+        }
         return;
     }
 
@@ -38,6 +42,46 @@ function route($uri)
         require_once $baseControllerPath . 'AdminController.php';
         $controller = new AdminController();
         $controller->dashboard();
+        return;
+    }
+
+    // Admin events list
+    if ($uri === 'admin/events') {
+        require_once $baseControllerPath . 'AdminController.php';
+        $controller = new AdminController();
+        $controller->manageEvents();
+        return;
+    }
+
+    // Create event
+    if ($uri === 'admin/events/create') {
+        require_once $baseControllerPath . 'AdminController.php';
+        $controller = new AdminController();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $controller->createEvent();
+        } else {
+            $controller->showEventForm();
+        }
+        return;
+    }
+
+    // Edit event
+    if (preg_match('#^admin/events/edit/(\d+)$#', $uri, $matches)) {
+        require_once $baseControllerPath . 'AdminController.php';
+        $controller = new AdminController();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $controller->updateEvent((int)$matches[1]);
+        } else {
+            $controller->showEventForm((int)$matches[1]);
+        }
+        return;
+    }
+
+    // Delete event
+    if (preg_match('#^admin/events/delete/(\d+)$#', $uri, $matches)) {
+        require_once $baseControllerPath . 'AdminController.php';
+        $controller = new AdminController();
+        $controller->deleteEvent((int)$matches[1]);
         return;
     }
 
@@ -49,11 +93,15 @@ function route($uri)
     }
 
     if ($uri === 'admin/register') {
-    require_once __DIR__ . '/../app/controllers/AdminController.php';
-    $controller = new AdminController();
-    $controller->showRegister();
-    return;
-}
+        require_once $baseControllerPath . 'AdminController.php';
+        $controller = new AdminController();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $controller->register();
+        } else {
+            $controller->showRegister();
+        }
+        return;
+    }
     if ($uri === 'event/list') {
         require_once $baseControllerPath . 'EventController.php';
         $controller = new EventController();
@@ -61,6 +109,41 @@ function route($uri)
         return;
     }
 
+    if ($uri === 'event/details') {
+        require_once $baseControllerPath . 'EventController.php';
+        $controller = new EventController();
+        $controller->details();
+        return;
+    }
+
+    // Participant dashboard (my registrations)
+    if ($uri === 'participant/dashboard') {
+        require_once $baseControllerPath . 'EventController.php';
+        $controller = new EventController();
+        $controller->myRegistrations();
+        return;
+    }
+
+    if ($uri === 'event/myRegistrations') {
+        require_once $baseControllerPath . 'EventController.php';
+        $controller = new EventController();
+        $controller->myRegistrations();
+        return;
+    }
+
+    if ($uri === 'event/cancelRegistration') {
+        require_once $baseControllerPath . 'EventController.php';
+        $controller = new EventController();
+        $controller->cancelRegistration();
+        return;
+    }
+
+    if ($uri === 'event/myEvents') {
+        require_once $baseControllerPath . 'EventController.php';
+        $controller = new EventController();
+        $controller->myEvents();
+        return;
+    }
 
     http_response_code(404);
     echo 'Page non trouvée';
