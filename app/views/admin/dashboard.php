@@ -1,6 +1,7 @@
 <?php 
 $pageTitle = 'Dashboard - MiniEvent';
-include 'app/views/partials/header.php'; 
+include __DIR__ . '/../partials/head.php';
+include __DIR__ . '/../partials/header.php'; 
 ?>
 
 <div class="container">
@@ -93,4 +94,4 @@ include 'app/views/partials/header.php';
     </div>
 </div>
 
-<?php include 'app/views/partials/footer.php'; ?>
+<?php include __DIR__ . '/../partials/footer.php'; ?>

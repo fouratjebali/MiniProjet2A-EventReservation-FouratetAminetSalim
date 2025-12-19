@@ -1,6 +1,7 @@
 <?php 
 $pageTitle = 'Manage Events - MiniEvent';
-include 'app/views/partials/header.php'; 
+include __DIR__ . '/../partials/head.php';
+include __DIR__ . '/../partials/header.php';
 ?>
 
 <div class="container">
@@ -57,4 +58,4 @@ include 'app/views/partials/header.php';
     <?php endif; ?>
 </div>
 
-<?php include 'app/views/partials/footer.php'; ?>
+<?php include __DIR__ . '/../partials/footer.php'; ?>

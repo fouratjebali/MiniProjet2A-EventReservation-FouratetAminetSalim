@@ -54,6 +54,17 @@ class Reservation {
         return $stmt;
     }
 
+    public function getAll() {
+        $query = "SELECT r.*, e.title as event_title, e.date, e.time, u.username, u.email 
+                  FROM " . $this->table . " r 
+                  JOIN events e ON r.event_id = e.id 
+                  JOIN users u ON r.user_id = u.id 
+                  ORDER BY r.registration_date DESC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt;
+    }
+
     public function isRegistered($user_id, $event_id) {
         $query = "SELECT * FROM " . $this->table . " 
                   WHERE user_id = :user_id AND event_id = :event_id AND status = 'registered'";

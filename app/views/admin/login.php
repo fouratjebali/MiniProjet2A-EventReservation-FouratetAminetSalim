@@ -11,6 +11,16 @@ include __DIR__ . '/../partials/header.php';
             <h2>Login</h2>
             <p class="auth-subtitle">Sign in to manage your events</p>
 
+            <?php if (!empty($_SESSION['success'])): ?>
+                <div class="alert alert-success"><?php echo htmlspecialchars($_SESSION['success']); ?></div>
+                <?php unset($_SESSION['success']); ?>
+            <?php endif; ?>
+
+            <?php if (!empty($_SESSION['error'])): ?>
+                <div class="alert alert-danger"><?php echo htmlspecialchars($_SESSION['error']); ?></div>
+                <?php unset($_SESSION['error']); ?>
+            <?php endif; ?>
+
             <form method="POST" action="/admin/login">
                 <div class="form-group">
                     <label for="email">Email</label>

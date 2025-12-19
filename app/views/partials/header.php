@@ -1,3 +1,4 @@
+<?php if (session_status() === PHP_SESSION_NONE) session_start(); ?>
 <header>
     <nav class="navbar">
         <div class="nav-container">

@@ -39,7 +39,7 @@
                                 <td><?php echo htmlspecialchars($reg['status']); ?></td>
                                 <td><?php echo date('Y-m-d', strtotime($reg['registration_date'])); ?></td>
                                 <td>
-                                    <a href="/event/details?id=<?php echo $reg['id']; ?>" class="btn btn-small">View</a>
+                                    <a href="/events/<?php echo $reg['id']; ?>" class="btn btn-small">View</a>
                                     <?php if ($reg['reg_status'] === 'registered' && $reg['status'] === 'upcoming'): ?>
                                         <a href="/event/cancelRegistration?id=<?php echo $reg['id']; ?>" class="btn btn-small btn-danger" onclick="return confirm('Are you sure you want to cancel this registration?');">Cancel</a>
                                     <?php endif; ?>
